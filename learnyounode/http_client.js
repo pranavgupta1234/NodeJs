@@ -5,15 +5,15 @@ var options = {
   path: '/index.html'
 };
 
-http.get(options, function(res) {
+http.get(process.argv[2], function(res) {
   res.setEncoding('utf8');
-  console.log("Got response: " + res.statusCode);
+  //console.log("Got response: " + res.statusCode);
 
   res.on("data", function(chunk) {
-    console.log("BODY: " + chunk);
+    console.log(chunk);
   });
 }).on('error', function(e) {
-  console.log("Got error: " + e.message);
+  console.log(e.message);
 });
 /*
 http.request docs contains example how to receive body of the response through handling data event:
