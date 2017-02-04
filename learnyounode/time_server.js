@@ -1,3 +1,10 @@
+
+/* this example shows how to write a TCP server in NodeJS. The below code creates a TCP server to which clients can attach
+and communication can be done through sockets.
+we can also the function inside create server is fired each time a connection is made (eg telnet 127.0.0.1 3445) initiates a
+connection to localhost at port number 3445 and after telnet client will receive the present time printedon the console.
+Also the data sent by client to server can also be logged on receiving data.
+*/
 var net = require('net');
 
 var PORT = process.argv[2];
@@ -14,13 +21,13 @@ var server =  net.createServer(function (socket){
         month= '0'+month;
       }
       var time_details = year+'-'+month+'-'+'0'+day+' '+hours+':'+minutes;
+      console.log(time_details);
+      socket.write(time_details);
   socket.on('data',function(data){
-    socket.write(time_details);
-    socket.close();
   });
   // Add a 'close' event handler to this instance of socket
   socket.on('close', function(data) {
-      console.log('CLOSED: ' + sock.remoteAddress +' '+ sock.remotePort);
+      console.log('CLOSED: ' + socket.remoteAddress +' '+ socket.remotePort);
   });
   socket.on('error',function(error){
       console.log(error.message);
