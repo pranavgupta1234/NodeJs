@@ -1,0 +1,256 @@
+Hii bro :D  168
+down vote
+favorite
+63
+
+
+I have a simple TCP server that listens on a port.
+
+var net = require("net");
+
+var server = net.createServer(function(socket) {
+    socket.end("Hello!\n");
+});
+
+server.listen(7777);
+
+I start it with node server.js and then close it with Ctrl + Z on Mac. When I try to run it again with node server.js I get this error message:
+
+node.js:201
+        throw e; // process.nextTick error, or 'error' event on first tick
+          ^
+Error: listen EADDRINUSE
+at errnoException (net.js:670:11)
+at Array.0 (net.js:771:26)
+at EventEmitter._tickCallback (node.js:192:41)
+
+Am I closing the program the wrong way? How can I prevent this from happening?
+node.js command
+shareedit
+
+edited Dec 24 '12 at 10:49
+
+asked May 9 '12 at 19:05
+Eleeist
+2,22273258
+
+
+
+Probably worth adding that Ctrl-Z suspends a command on *NIX, and doesn't close it. If you type fg after Ctrl-Z, you'll be back where you left off. So your earlier node is still running. Watch out if you're doing this for other commands too! – ruffin Nov 11 '16 at 16:37
+add a comment
+8 Answers
+active
+oldest
+votes
+up vote
+230
+down vote
+accepted
+
+
+To end the program, you should be using Ctrl + C. If you do that, it sends SIGINT, which allows the program to end gracefully, unbinding from any ports it is listening on.
+
+See also: http://superuser.com/a/262948/48624
+shareedit
+
+edited Dec 30 '13 at 18:20
+
+answered May 9 '12 at 19:16
+Brad
+90.6k22168288
+
+10
+
+Ctrl + C does not work for me. Only ^C gets typed into the console, and program does not exits. – Eleeist May 9 '12 at 19:21
+
+
+@Eleeist, What are you using as a terminal? It works great for me. – Brad May 9 '12 at 19:22
+1
+
+@Eleeist, You've probably remapped your keys or something. Ctrl+C works fine. In any case, that's a separate issue from your real problem. You should post a "Ctrl+C doesn't work" question over at SuperUser.com. – Brad May 9 '12 at 19:31
+1
+
+@jt0dd You could always kill -9, but I wouldn't. Are you actually sure your application is still the one keeping ports open? I've never had that problem. As soon as my application ends, the connections are always immediately terminated. I would use netstat to determine if your app or something else is lingering on that port. – Brad Jul 10 '14 at 19:52
+1
+
+I faced to this problem when I was using keyboard type on other language. Be sure your mac input language is English – Fa.Shapouri Dec 28 '16 at 17:07
+show 8 more comments
+up vote
+186
+down vote
+
+
+Ctrl+Z suspends it, which means it can still be running.
+
+Ctrl+C will actually kill it.
+
+you can also kill it manually like this:
+
+ps aux | grep node
+
+Find the process ID (second from the left):
+
+kill -9 PROCESS_ID
+
+This may also work
+
+killall node
+
+shareedit
+
+edited May 27 '14 at 14:43
+rink.attendant.6
+9,802133873
+
+answered May 9 '12 at 19:21
+Jamund Ferguson
+10.6k22640
+
+
+
+ctrl+c will work but none of these command will work for me. I don't know why ? And I'm looking for command line solution – angry kiwi Aug 26 '12 at 3:59
+10
+
+killall node works for me :D – Joel Murphy Apr 9 '13 at 21:42
+7
+
+Be careful with killall node, you might kill process you wouldn't want to kill if they match "node" – Samuel Bolduc Jul 17 '13 at 17:21
+
+
+you may want to move up killall nodein your answer since that is really the easiest and most reliable option (as long as you're ok with killing all instances) – Boern Jan 24 '16 at 14:42
+1
+
+'killall' is not recognized as an internal or external command, operable program or batch file. Am i missing something? – Ayyash Nov 8 '16 at 8:42
+show 3 more comments
+up vote
+17
+down vote
+
+
+Or alternatively you can do all of these in one line:
+
+kill -9 $(ps aux | grep '\snode\s' | awk '{print $2}')
+
+You can replace node inside '\snode\s' with any other process name.
+shareedit
+
+edited Sep 22 '14 at 15:44
+
+answered Sep 22 '14 at 15:17
+Hamid
+2,6322030
+
+4
+
+At that point, you could just use killall. – Brad Dec 7 '14 at 15:36
+4
+
+killall didn't work for me, but this did – FabianCook Dec 8 '14 at 1:20
+1
+
+alternately, you can always try: ps -ef | grep "node" | awk '{print $2}' | xargs kill -9 – frymaster Jul 16 '15 at 22:20
+add a comment
+up vote
+17
+down vote
+
+
+you can type .exit to quit node js REPL
+shareedit
+
+answered Jul 22 '13 at 10:12
+sunny1304
+1,25221125
+
+add a comment
+up vote
+12
+down vote
+
+
+If you are running Node.js interactively (the REPL):
+
+Ctrl + C will take back you to > prompt then type:
+
+process.exit()
+
+or just use Ctrl + D.
+shareedit
+
+edited Dec 7 '14 at 15:38
+Brad
+90.6k22168288
+
+answered Feb 15 '14 at 7:54
+sr77in
+169112
+
+
+
+This works on linux too. Just type process.exit() – Jason Aug 10 '14 at 2:40
+add a comment
+up vote
+8
+down vote
+
+
+$ sudo killall node in another terminal works on mac, while killall node not working:
+
+$ killall node
+No matching processes belonging to you were found
+
+shareedit
+
+answered Jun 18 '13 at 12:53
+Maxim Yefremov
+3,14984287
+
+add a comment
+up vote
+1
+down vote
+
+
+Though this is a late answer, I found this from NodeJS docs:
+
+    The 'exit' event is emitted when the REPL is exited either by receiving the .exit command as input, the user pressing <ctrl>-C twice to signal SIGINT, or by pressing <ctrl>-D to signal 'end' on the input stream. The listener callback is invoked without any arguments.
+
+So to summarize you can exit by:
+
+    Typing .exit in nodejs REPL.
+    Pressing <ctrl>-C twice.
+    pressing <ctrl>-D.
+    process.exit(0) meaning a natural exit from REPL. If you want to return any other status you can return a non zero number.
+    process.kill(process.pid) is the way to kill using nodejs api from within your code or from REPL.
+
+shareedit
+
+edited Nov 6 '16 at 22:22
+
+answered Sep 22 '16 at 16:41
+randominstanceOfLivingThing
+3,36311535
+
+add a comment
+up vote
+1
+down vote
+
+
+If you want to stop your server with npm stop or something like this. You can write the code that kill your server process as:
+
+require('child_process').exec(`kill -9 ${pid}`)
+
+Check this link for the detail: https://gist.github.com/dominhhai/aa7f3314ad27e2c50fd5
+shareedit
+
+answered Jan 31 '16 at 3:06
+BigEgg
+363
+
+add a comment
+protected by Brad Dec 7 '14 at 15:36
+
+Thank you for your interest in this question. Because it has attracted low-quality or spam answers that had to be removed, posting an answer now requires 10 reputation on this site (the association bonus does not count).
+
+Would you like to answer one of these unanswered questions instead?
