@@ -8,8 +8,7 @@ var _dirname = path.resolve();
 //function is fired up each time request is made
 var server  = http.createServer(function(req,res){
   console.log('request was made'+ req.url);
-  res.writeHead(200,{'Content-Type':'text/html'});
-  var readStream = fs.createReadStream(_dirname+'/index.html','utf8');
+var readStream = fs.createReadStream(_dirname+'/index.html','utf8');
   //remember that res is a writable stream and req is a readable stream
   readStream.pipe(res);
 });
