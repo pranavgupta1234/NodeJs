@@ -12,6 +12,7 @@ var server = http.createServer(function(req,res){
     job : 'Software Developer',
     age : 19
   };
+//JSON.stringify convets the object into json string
   res.end(JSON.stringify(person));
 })
 
